@@ -1,0 +1,197 @@
+.checkout-container {
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+  padding-bottom: 70px;
+}
+
+.checkout-title {
+  margin: 0 88px;
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
+.checkout-content {
+  margin: 0 88px;
+  display: flex;
+  gap: 40px;
+}
+
+.order-details {
+  flex: 1;
+  background-color: #E6E6E6;
+  padding: 24px;
+  border-radius: 12px;
+  height: 540px;
+}
+
+.order-header {
+  display: flex;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #868789;
+  padding-bottom: 12px;
+  gap: 10px;
+}
+
+
+.order-header h2 {
+  font-size: 20px;
+  color: #374151;
+  font-weight: normal;
+}
+
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ... other CSS rules remain the same ... */
+
+.order-item {
+  display: grid;
+  grid-template-columns: 60px minmax(150px, 1fr) 50px 100px;
+  align-items: center;
+  gap: 15px;
+}
+
+.item-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+  background-color: white;
+  padding: 4px;
+}
+
+.item-info {
+  display: block; /* Changed from flex to block since we don't need column layout anymore */
+}
+
+.item-name {
+  font-size: 13px;
+  font-weight: normal;
+  color: #000;
+  line-height: 1.2;
+  display: block; /* Ensure it takes full width */
+}
+
+.item-quantity {
+  font-size: 13px;
+  color: #000;
+  text-align: center; /* Center the quantity */
+}
+
+.item-price {
+  font-size: 13px;
+  text-align: right;
+  color: #000;
+}
+
+.order-checkout-summary {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #868789;
+  
+}
+
+.order-checkout-summary1 {
+  border-bottom: 1px solid #868789;
+}
+
+.summary-row-shipping {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: #374151;
+}
+
+.summary-row-sub {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: #374151;
+  font-weight: bold;
+}
+
+.summary-row.total {
+  font-weight: bold;
+  font-size: 24px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Rest of the CSS remains the same */
+.purchase-form {
+  flex: 1;
+}
+
+.purchase-form h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #aeb2ba;
+  border-radius: 4px;
+}
+
+.location-selects {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.form-select {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #aeb2ba;
+  border-radius: 4px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.delivery-section,
+.coupon-section {
+  margin-top: 30px;
+}
+
+.coupon-input {
+  display: flex;
+  gap: 10px;
+}
+
+.apply-button {
+  padding: 10px 20px;
+  background-color: #374151;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.payment-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin-top: 30px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.apply-button:hover,
+.payment-button:hover {
+  opacity: 0.9;
+}
