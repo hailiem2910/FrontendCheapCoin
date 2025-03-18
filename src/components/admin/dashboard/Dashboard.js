@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import { getOrders, getOrderAnalytics } from '../../../services/orderService';
-import { getSoldProducts, getSoldProductsAnalytics } from '../../../services/productSoldService';
+import { getSoldProducts} from '../../../services/productSoldService';
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
