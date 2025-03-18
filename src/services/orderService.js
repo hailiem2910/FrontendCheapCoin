@@ -28,10 +28,13 @@ export const getUserOrders = async () => {
 // Lấy chi tiết đơn hàng
 export const getOrderDetail = async (orderId) => {
   try {
-    const response = await axiosInstance.get(`${ORDER_API_URL}/${orderId}`);
+    const response = await axiosInstance.get(`${ORDER_API_URL}/${orderId}`, {
+      headers: {
+        'Role': 'Admin' // Thêm role vào header
+      }
+    });
     return response.data;
   } catch (error) {
-    console.error('Error fetching order details:', error);
     throw error;
   }
 };

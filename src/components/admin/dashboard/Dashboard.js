@@ -15,12 +15,10 @@ const Dashboard = () => {
   const [topProducts, setTopProducts] = useState([]);
 
   useEffect(() => {
-    // Set current month
     const now = new Date();
     const month = now.toLocaleString('default', { month: 'long' });
     setCurrentMonth(month);
 
-    // Fetch data
     fetchDashboardData();
   }, []);
 
@@ -105,7 +103,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <div className="dashboard-content">
-        <h1 className="dashboard-title">Bảng Điều Khiển</h1>
+        <h1 className="dashboard-title">Dashboard</h1>
         
         <div className="dashboard-section">
           <h2 className="dashboard-section-title">Doanh Thu</h2>

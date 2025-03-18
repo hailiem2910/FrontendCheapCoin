@@ -46,10 +46,10 @@ const AddSeries = () => {
   };
 
   const handleImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files) {
       setSeriesData({
         ...seriesData,
-        representativeImage: e.target.files[0]
+        imageUrls: Array.from(e.target.files) // Lưu dưới dạng mảng
       });
     }
   };
@@ -70,14 +70,18 @@ const AddSeries = () => {
       // Create FormData object to handle file upload
       const formData = new FormData();
       
-      // Append all form fields to FormData
-      Object.keys(seriesData).forEach(key => {
-        if (key === 'representativeImage' && seriesData[key]) {
-          formData.append(key, seriesData[key]);
-        } else if (seriesData[key] !== null && seriesData[key] !== '') {
-          formData.append(key, seriesData[key]);
+
+      seriesData.imageUrls.forEach((file) => {
+        formData.append('imageUrls', file);
+      });
+
+      const fieldsToExclude = ['imageUrls', 'representativeImage']; // Loại bỏ trường ảnh cũ
+      Object.entries(seriesData).forEach(([key, value]) => {
+        if (!fieldsToExclude.includes(key) && value !== null && value !== '') {
+          formData.append(key, value);
         }
       });
+    
 
       // Make API call to create series
       await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/v1/seri/create`, formData, {
@@ -273,7 +277,9 @@ const AddSeries = () => {
                 <input
                   type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleImageChange}
+                   name="imageUrls"
                   className="form-file-input"
                   required
                 />

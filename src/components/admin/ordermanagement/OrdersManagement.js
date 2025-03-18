@@ -116,7 +116,16 @@ const OrdersManagement = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  };
+
+  const formatPrice = (price) => {
+    return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || "0";
   };
 
   const months = [
@@ -173,7 +182,7 @@ const OrdersManagement = () => {
                 <th>Tên khách hàng</th>
                 <th>Email</th>
                 <th>Số điện thoại</th>
-                <th>Địa chỉ</th>
+                <th>Giá tiền</th>
                 <th>Ngày đặt hàng</th>
                 <th>Trạng thái</th>
                 <th colSpan="2">Hành động</th>
@@ -186,7 +195,7 @@ const OrdersManagement = () => {
                   <td>{order.shippingAddress.fullName}</td>
                   <td>{order.userId.email}</td>
                   <td>{order.shippingAddress.phone}</td>
-                  <td>{order.shippingAddress.address}</td>
+                  <td>{formatPrice(order.totalPrice)} VNĐ</td>
                   <td>{formatDate(order.createdAt)}</td>
                   <td className={`order-manage-status order-status-${order.status}`}>
                     {order.status === 'pending' && 'Đang xử lý'}
