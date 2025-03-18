@@ -191,3 +191,29 @@
       gap: 15px;
     }
   }
+
+  /* Thêm style cho nút "Xem chi tiết" */
+.order-manage-detail-button {
+  padding: 6px 12px;
+  background-color: #4a6cf7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.order-manage-detail-button:hover {
+  background-color: #3a5ce5;
+}
+
+.order-manage-row {
+  cursor: pointer;
+}
+
+.order-manage-row:hover {
+  background-color: #f5f5f5;
+}
+
+/* Thêm vào cuối file CSS hiện tại */

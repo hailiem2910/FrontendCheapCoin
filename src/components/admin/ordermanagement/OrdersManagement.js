@@ -12,7 +12,6 @@ const OrdersManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const ordersPerPage = 5;
-  // Ref để theo dõi xem đang có cập nhật trạng thái hay không
   const isUpdatingStatus = useRef(false);
 
   const navigate = useNavigate();
@@ -26,22 +25,11 @@ const OrdersManagement = () => {
       setLoading(true);
       const response = await getOrders();
       setOrders(response.orders);
-      
-      // Chỉ áp dụng bộ lọc và tính toán lại trang khi không đang cập nhật trạng thái
+
       if (!isUpdatingStatus.current) {
-        if (selectedMonth === 'all') {
-          setFilteredOrders(response.orders);
-        } else {
-          const month = parseInt(selectedMonth);
-          const filtered = response.orders.filter(order => {
-            const orderDate = new Date(order.createdAt);
-            return orderDate.getMonth() + 1 === month;
-          });
-          setFilteredOrders(filtered);
-        }
-        setTotalPages(Math.ceil(response.orders.length / ordersPerPage));
+        applyFilters(response.orders);
       }
-      
+
       setLoading(false);
     } catch (err) {
       console.error('Lỗi khi lấy danh sách đơn hàng:', err);
@@ -50,77 +38,46 @@ const OrdersManagement = () => {
     }
   };
 
-  // Định dạng ngày tháng
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  const applyFilters = (orders) => {
+    let filtered = orders;
+    if (selectedMonth !== 'all') {
+      const month = parseInt(selectedMonth);
+      filtered = orders.filter(order => {
+        const orderDate = new Date(order.createdAt);
+        return orderDate.getMonth() + 1 === month;
+      });
+    }
+    setFilteredOrders(filtered);
+    const newTotalPages = Math.ceil(filtered.length / ordersPerPage);
+    setTotalPages(newTotalPages > 0 ? newTotalPages : 1);
   };
 
-  // Lọc đơn hàng theo tháng - giữ nguyên trang hiện tại khi đang cập nhật trạng thái
   useEffect(() => {
-    // Chỉ thực hiện lọc và reset trang khi không đang cập nhật trạng thái
     if (!isUpdatingStatus.current) {
-      if (selectedMonth === 'all') {
-        setFilteredOrders(orders);
-      } else {
-        const month = parseInt(selectedMonth);
-        const filtered = orders.filter(order => {
-          const orderDate = new Date(order.createdAt);
-          return orderDate.getMonth() + 1 === month;
-        });
-        setFilteredOrders(filtered);
-      }
-      const newTotalPages = Math.ceil((selectedMonth === 'all' ? orders.length : filteredOrders.length) / ordersPerPage);
-      setTotalPages(newTotalPages > 0 ? newTotalPages : 1);
-      setCurrentPage(1); // Reset trang khi thay đổi tháng
+      applyFilters(orders);
+      setCurrentPage(1);
     }
   }, [selectedMonth, orders]);
 
-  // Lấy đơn hàng cho trang hiện tại
   const getCurrentOrders = () => {
     const startIndex = (currentPage - 1) * ordersPerPage;
     const endIndex = startIndex + ordersPerPage;
     return filteredOrders.slice(startIndex, endIndex);
   };
 
-  // Xử lý thay đổi trạng thái đơn hàng - cải tiến để giữ nguyên trang hiện tại
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       isUpdatingStatus.current = true;
-      
-      // Cập nhật trạng thái trên server
+
       await updateOrderStatus(orderId, newStatus);
-      
-      // Cập nhật trạng thái trong state
-      const updatedOrders = orders.map(order => 
+
+      const updatedOrders = orders.map(order =>
         order._id === orderId ? { ...order, status: newStatus } : order
       );
       setOrders(updatedOrders);
-      
-      // Cập nhật filteredOrders mà không thay đổi trang hiện tại
-      let updatedFilteredOrders;
-      if (selectedMonth === 'all') {
-        updatedFilteredOrders = updatedOrders;
-      } else {
-        const month = parseInt(selectedMonth);
-        updatedFilteredOrders = updatedOrders.filter(order => {
-          const orderDate = new Date(order.createdAt);
-          return orderDate.getMonth() + 1 === month;
-        });
-      }
-      setFilteredOrders(updatedFilteredOrders);
-      
-      // Chỉ cập nhật totalPages nếu cần, nhưng không thay đổi currentPage
-      const newTotalPages = Math.ceil(updatedFilteredOrders.length / ordersPerPage);
-      if (newTotalPages !== totalPages) {
-        setTotalPages(newTotalPages > 0 ? newTotalPages : 1);
-        
-        // Chỉ điều chỉnh currentPage nếu nó vượt quá totalPages mới
-        if (currentPage > newTotalPages) {
-          setCurrentPage(newTotalPages > 0 ? newTotalPages : 1);
-        }
-      }
-      
+
+      applyFilters(updatedOrders);
+
       isUpdatingStatus.current = false;
     } catch (err) {
       console.error('Lỗi khi cập nhật trạng thái đơn hàng:', err);
@@ -129,12 +86,14 @@ const OrdersManagement = () => {
     }
   };
 
-  // Xử lý chuyển trang
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  // Tạo phân trang
+  const handleViewOrderDetail = (orderId) => {
+    navigate(`/admin/orders/${orderId}`);
+  };
+
   const renderPagination = () => {
     const pages = [];
     for (let i = 1; i <= totalPages; i++) {
@@ -155,7 +114,11 @@ const OrdersManagement = () => {
     );
   };
 
-  // Tạo danh sách các tháng
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  };
+
   const months = [
     { value: 1, label: 'Tháng 1' },
     { value: 2, label: 'Tháng 2' },
@@ -171,7 +134,6 @@ const OrdersManagement = () => {
     { value: 12, label: 'Tháng 12' }
   ];
 
-  // Lấy tháng hiện tại của các đơn hàng được lọc
   const getCurrentMonth = () => {
     if (selectedMonth === 'all') return 'Tất cả các tháng';
     return months.find(m => m.value === parseInt(selectedMonth))?.label || 'Tất cả các tháng';
@@ -182,15 +144,13 @@ const OrdersManagement = () => {
 
   return (
     <div className="order-manage-container">
-      
       <div className="order-manage-content">
         <h1 className="order-manage-title">Quản lý đơn hàng</h1>
-        
         <div className="order-manage-controls">
           <div className="order-manage-filter">
             <label htmlFor="month-filter">Lọc theo tháng:</label>
-            <select 
-              id="month-filter" 
+            <select
+              id="month-filter"
               className="order-manage-select"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
@@ -204,10 +164,8 @@ const OrdersManagement = () => {
             </select>
           </div>
         </div>
-        
         <div className="order-manage-table-container">
           {renderPagination()}
-          
           <table className="order-manage-table">
             <thead>
               <tr>
@@ -217,25 +175,19 @@ const OrdersManagement = () => {
                 <th>Số điện thoại</th>
                 <th>Địa chỉ</th>
                 <th>Ngày đặt hàng</th>
-                <th>Ngày giao hàng</th>
                 <th>Trạng thái</th>
-                <th>Hành động</th>
+                <th colSpan="2">Hành động</th>
               </tr>
             </thead>
             <tbody>
               {getCurrentOrders().map(order => (
-                <tr key={order._id}>
+                <tr key={order._id} className="order-manage-row">
                   <td>#{order.orderCode}</td>
                   <td>{order.shippingAddress.fullName}</td>
                   <td>{order.userId.email}</td>
                   <td>{order.shippingAddress.phone}</td>
                   <td>{order.shippingAddress.address}</td>
                   <td>{formatDate(order.createdAt)}</td>
-                  <td>
-                    {order.shippingStatus === 'delivered' 
-                      ? formatDate(order.updatedAt) 
-                      : '-'}
-                  </td>
                   <td className={`order-manage-status order-status-${order.status}`}>
                     {order.status === 'pending' && 'Đang xử lý'}
                     {order.status === 'done' && 'Hoàn thành'}
@@ -243,7 +195,7 @@ const OrdersManagement = () => {
                     {order.status === 'payment_fail' && 'Thanh toán thất bại'}
                   </td>
                   <td>
-                    <select 
+                    <select
                       className="order-manage-action-select"
                       value=""
                       onChange={(e) => {
@@ -259,12 +211,19 @@ const OrdersManagement = () => {
                       <option value="cancelled">Hủy đơn</option>
                     </select>
                   </td>
+                  <td>
+                    <button 
+                      className="order-manage-detail-button"
+                      onClick={() => handleViewOrderDetail(order._id)}
+                    >
+                      Xem chi tiết
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        
         <div className="order-manage-summary">
           <div className="order-manage-month">
             <span>Tháng:</span> {getCurrentMonth()}

@@ -9,7 +9,7 @@ import ProductPage from "./components/product/ProductPage";
 import ProductDetail from "./components/productdetail/ProductDetail";
 import Cart from "./components/cart/Cart";
 import Checkout from "./components/checkout/Checkout";
-import PayOSQR from "./components/payosqr/PayOSQR"; // Import the new component
+import PayOSQR from "./components/payosqr/PayOSQR"; 
 import Login from "./components/login/Login";
 import Signup from "./components/signup/SignUp";
 import RequestResetPassword from "./components/login/RequestResetPassword";
@@ -21,6 +21,7 @@ import AddSeries from "./components/admin/addseries/AddSeries";
 import OrdersManagement from "./components/admin/ordermanagement/OrdersManagement";
 import ProductSoldManagement from "./components/admin/productsoldmanagement/ProductSoldManagement";
 import Dashboard from "./components/admin/dashboard/Dashboard";
+import OrderDetail from "./components/admin/orderdetail/OrderDetail";
 
 const PrivateRoute = ({ children }) => {
   const accessToken = localStorage.getItem('accessToken');
@@ -80,6 +81,11 @@ function App() {
           <Route path="/admin/orders" element={
             <AdminRoute>
               <OrdersManagement />
+            </AdminRoute>
+          } />
+          <Route path="/admin/orders/:orderId" element={
+            <AdminRoute>
+              <OrderDetail />
             </AdminRoute>
           } />
           <Route path="/admin/sold-products" element={
