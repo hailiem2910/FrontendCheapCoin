@@ -1,3 +1,7 @@
+body {
+  font-family: 'Afacad', sans-serif;
+}
+
 .product-container {
   align-items: center;
   display: flex;

@@ -1,3 +1,7 @@
+body {
+  font-family: 'Afacad', sans-serif;
+}
+
 .checkout-container {
   margin: 0 auto;
   padding: 20px;
@@ -194,4 +198,49 @@
 .apply-button:hover,
 .payment-button:hover {
   opacity: 0.9;
+}
+
+/* Alert messages styling */
+.alert {
+  padding: 12px 16px;
+  margin: 10px 160px 20px;
+  border-radius: 8px;
+  font-family: 'Afacad', sans-serif;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  animation: fadeInOut 5s forwards;
+  position: relative;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.alert-success {
+  background-color: rgba(220, 252, 231, 0.9);
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.alert-error {
+  background-color: rgba(254, 226, 226, 0.9);
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+}
+
+.alert::before {
+  margin-right: 12px;
+  font-size: 18px;
+}
+
+.alert-success::before {
+  content: "✓";
+}
+
+.alert-error::before {
+  content: "✕";
 }

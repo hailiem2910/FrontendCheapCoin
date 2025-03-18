@@ -1,12 +1,13 @@
 import { axiosInstance } from './tokenService';
+const BASE_API_URL = process.env.REACT_APP_API_URL ;
 
 // Add item to cart
 const addToCart = async (cartData) => {
   try {
-    const response = await axiosInstance.post('http://localhost:5000/api/v1/cart/add', {
+    const response = await axiosInstance.post(`${BASE_API_URL}/api/v1/cart/add`, {
       seriesId: cartData.seriesId,
       quantity: cartData.quantity,
-      type: cartData.type // Changed from size to type
+      type: cartData.type
     });
     return response.data;
   } catch (error) {
@@ -18,7 +19,7 @@ const addToCart = async (cartData) => {
 // Get cart items
 const getCartItems = async () => {
   try {
-    const response = await axiosInstance.get('http://localhost:5000/api/v1/cart');
+    const response = await axiosInstance.get(`${BASE_API_URL}/api/v1/cart`);
     return response.data;
   } catch (error) {
     console.error('Error fetching cart:', error);
@@ -29,7 +30,7 @@ const getCartItems = async () => {
 // Update cart item quantity
 const updateCartItem = async (seriesId, quantity) => {
   try {
-    const response = await axiosInstance.put('http://localhost:5000/api/v1/cart/update', {
+    const response = await axiosInstance.put(`${BASE_API_URL}/api/v1/cart/update`, {
       seriesId,
       quantity
     });
@@ -44,7 +45,7 @@ const updateCartItem = async (seriesId, quantity) => {
 const removeCartItem = async (seriesId, type) => {
   try {
     // Update API endpoint to include type parameter (changed from size)
-    const response = await axiosInstance.delete(`http://localhost:5000/api/v1/cart/remove/${seriesId}`, {
+    const response = await axiosInstance.delete(`${BASE_API_URL}/api/v1/cart/remove/${seriesId}`, {
       data: { type }
     });
     return response.data;
@@ -57,7 +58,7 @@ const removeCartItem = async (seriesId, type) => {
 // Remove all items from cart
 const removeAllCartItems = async () => {
   try {
-    const response = await axiosInstance.delete('http://localhost:5000/api/v1/cart/removeAll');
+    const response = await axiosInstance.delete(`${BASE_API_URL}/api/v1/cart/removeAll`);
     return response.data;
   } catch (error) {
     console.error('Error removing all cart items:', error);

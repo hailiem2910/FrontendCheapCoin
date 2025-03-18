@@ -72,7 +72,7 @@ const Signup = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/v1/auth/registerByMail', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/v1/auth/registerByMail`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

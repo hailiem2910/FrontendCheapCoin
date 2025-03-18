@@ -1,3 +1,7 @@
+body {
+  font-family: 'Afacad', sans-serif;
+} 
+
 .error-message {
     background-color: #FEE2E2;
     border: 1px solid #F87171;

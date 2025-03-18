@@ -20,7 +20,7 @@ const RequestResetPassword = () => {
       // Gửi URL của trang reset mật khẩu frontend
       const redirectUrl = `${window.location.origin}`;
       
-      const response = await axiosInstance.post(`${process.env.REACT_APP_API_URL}/auth/requestResetPassword`, {
+      const response = await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/v1/auth/requestResetPassword`, {
         email,
         redirectUrl
       });

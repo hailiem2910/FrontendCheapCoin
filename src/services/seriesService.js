@@ -1,4 +1,5 @@
 import { axiosInstance } from './tokenService';
+const BASE_API_URL = process.env.REACT_APP_API_URL ;
 
 // Get all series
 const getAllSeries = async (page = 1, limit = 20, filters = {}, sort = {}) => {
@@ -9,7 +10,7 @@ const getAllSeries = async (page = 1, limit = 20, filters = {}, sort = {}) => {
       ...filters,
       ...sort
     };
-    const response = await axiosInstance.get('http://localhost:5000/api/v1/seri', { params });
+    const response = await axiosInstance.get(`${BASE_API_URL}/api/v1/seri`, { params });
     return response.data;
   } catch (error) {
     console.error('Error fetching series:', error);
@@ -20,7 +21,7 @@ const getAllSeries = async (page = 1, limit = 20, filters = {}, sort = {}) => {
 // Get a specific series by ID
 const getSeriesById = async (id) => {
   try {
-    const response = await axiosInstance.get(`http://localhost:5000/api/v1/seri/${id}`);
+    const response = await axiosInstance.get(`${BASE_API_URL}/api/v1/seri/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching series by ID:', error);

@@ -31,7 +31,7 @@ const ResetPassword = () => {
     // Kiểm tra tính hợp lệ của token
     const verifyToken = async () => {
       try {
-        await axiosInstance.get(`${process.env.REACT_APP_API_URL}/auth/resetPassword?token=${tokenFromUrl}`);
+        await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/v1/auth/resetPassword?token=${tokenFromUrl}`);
         setIsValidToken(true);
       } catch (err) {
         setError(err.response?.data?.error || 'Token không hợp lệ hoặc đã hết hạn.');
@@ -55,7 +55,7 @@ const ResetPassword = () => {
     setIsSubmitting(true);
     
     try {
-      const response = await axiosInstance.post(`${process.env.REACT_APP_API_URL}/auth/resetPassword`, {
+      const response = await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/v1/auth/resetPassword`, {
         token,
         newPassword
       });

@@ -20,6 +20,7 @@ import { isAuthenticated, setAuthHeader } from './services/tokenService';
 import AddSeries from "./components/admin/addseries/AddSeries"; 
 import OrdersManagement from "./components/admin/ordermanagement/OrdersManagement";
 import ProductSoldManagement from "./components/admin/productsoldmanagement/ProductSoldManagement";
+import Dashboard from "./components/admin/dashboard/Dashboard";
 
 const PrivateRoute = ({ children }) => {
   const accessToken = localStorage.getItem('accessToken');
@@ -42,7 +43,7 @@ const PrivateRoute = ({ children }) => {
 
   // Redirect admin to admin dashboard
   if (userRole === 'Admin') {
-    return <Navigate to="/admin/add-series" />;
+    return <Navigate to="/admin/dashboard" />;
   }
 
   return isAuthenticated() ? children : <Navigate to="/login" />;
@@ -61,6 +62,11 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Admin Routes */}
+          <Route path="/admin/dashboard" element={
+            <AdminRoute>
+              <Dashboard />
+            </AdminRoute>
+          } />
           <Route path="/admin/add-series" element={
             <AdminRoute>
               <AddSeries />

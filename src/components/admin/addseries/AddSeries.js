@@ -28,7 +28,7 @@ const AddSeries = () => {
   const fetchSeries = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get('http://localhost:5000/api/v1/seri', {
+      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/v1/seri`, {
         params: {
           page: 1,
           limit: 10
@@ -80,7 +80,7 @@ const AddSeries = () => {
       });
 
       // Make API call to create series
-      await axios.post('http://localhost:5000/api/v1/seri/create', formData, {
+      await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/v1/seri/create`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
@@ -143,7 +143,7 @@ const AddSeries = () => {
                   seriesList.map(series => (
                     <tr key={series._id}>
                       <td>{series.name}</td>
-                      <td>${parseFloat(series.price).toFixed(2)}</td>
+                      <td>{parseFloat(series.price)} VND</td>
                       <td>{series.size}</td>
                       <td>{series.material}</td>
                     </tr>

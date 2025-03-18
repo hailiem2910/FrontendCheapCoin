@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './OrdersManagement.css';
 import { getOrders, updateOrderStatus } from '../../../services/orderService';
@@ -12,6 +12,8 @@ const OrdersManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const ordersPerPage = 5;
+  // Ref để theo dõi xem đang có cập nhật trạng thái hay không
+  const isUpdatingStatus = useRef(false);
 
   const navigate = useNavigate();
 
@@ -24,8 +26,22 @@ const OrdersManagement = () => {
       setLoading(true);
       const response = await getOrders();
       setOrders(response.orders);
-      setFilteredOrders(response.orders);
-      setTotalPages(Math.ceil(response.orders.length / ordersPerPage));
+      
+      // Chỉ áp dụng bộ lọc và tính toán lại trang khi không đang cập nhật trạng thái
+      if (!isUpdatingStatus.current) {
+        if (selectedMonth === 'all') {
+          setFilteredOrders(response.orders);
+        } else {
+          const month = parseInt(selectedMonth);
+          const filtered = response.orders.filter(order => {
+            const orderDate = new Date(order.createdAt);
+            return orderDate.getMonth() + 1 === month;
+          });
+          setFilteredOrders(filtered);
+        }
+        setTotalPages(Math.ceil(response.orders.length / ordersPerPage));
+      }
+      
       setLoading(false);
     } catch (err) {
       console.error('Lỗi khi lấy danh sách đơn hàng:', err);
@@ -40,20 +56,24 @@ const OrdersManagement = () => {
     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
   };
 
-  // Lọc đơn hàng theo tháng
+  // Lọc đơn hàng theo tháng - giữ nguyên trang hiện tại khi đang cập nhật trạng thái
   useEffect(() => {
-    if (selectedMonth === 'all') {
-      setFilteredOrders(orders);
-    } else {
-      const month = parseInt(selectedMonth);
-      const filtered = orders.filter(order => {
-        const orderDate = new Date(order.createdAt);
-        return orderDate.getMonth() + 1 === month;
-      });
-      setFilteredOrders(filtered);
+    // Chỉ thực hiện lọc và reset trang khi không đang cập nhật trạng thái
+    if (!isUpdatingStatus.current) {
+      if (selectedMonth === 'all') {
+        setFilteredOrders(orders);
+      } else {
+        const month = parseInt(selectedMonth);
+        const filtered = orders.filter(order => {
+          const orderDate = new Date(order.createdAt);
+          return orderDate.getMonth() + 1 === month;
+        });
+        setFilteredOrders(filtered);
+      }
+      const newTotalPages = Math.ceil((selectedMonth === 'all' ? orders.length : filteredOrders.length) / ordersPerPage);
+      setTotalPages(newTotalPages > 0 ? newTotalPages : 1);
+      setCurrentPage(1); // Reset trang khi thay đổi tháng
     }
-    setTotalPages(Math.ceil((selectedMonth === 'all' ? orders.length : filteredOrders.length) / ordersPerPage));
-    setCurrentPage(1);
   }, [selectedMonth, orders]);
 
   // Lấy đơn hàng cho trang hiện tại
@@ -63,14 +83,49 @@ const OrdersManagement = () => {
     return filteredOrders.slice(startIndex, endIndex);
   };
 
-  // Xử lý thay đổi trạng thái đơn hàng
+  // Xử lý thay đổi trạng thái đơn hàng - cải tiến để giữ nguyên trang hiện tại
   const handleStatusChange = async (orderId, newStatus) => {
     try {
+      isUpdatingStatus.current = true;
+      
+      // Cập nhật trạng thái trên server
       await updateOrderStatus(orderId, newStatus);
-      fetchOrders(); // Tải lại danh sách sau khi cập nhật
+      
+      // Cập nhật trạng thái trong state
+      const updatedOrders = orders.map(order => 
+        order._id === orderId ? { ...order, status: newStatus } : order
+      );
+      setOrders(updatedOrders);
+      
+      // Cập nhật filteredOrders mà không thay đổi trang hiện tại
+      let updatedFilteredOrders;
+      if (selectedMonth === 'all') {
+        updatedFilteredOrders = updatedOrders;
+      } else {
+        const month = parseInt(selectedMonth);
+        updatedFilteredOrders = updatedOrders.filter(order => {
+          const orderDate = new Date(order.createdAt);
+          return orderDate.getMonth() + 1 === month;
+        });
+      }
+      setFilteredOrders(updatedFilteredOrders);
+      
+      // Chỉ cập nhật totalPages nếu cần, nhưng không thay đổi currentPage
+      const newTotalPages = Math.ceil(updatedFilteredOrders.length / ordersPerPage);
+      if (newTotalPages !== totalPages) {
+        setTotalPages(newTotalPages > 0 ? newTotalPages : 1);
+        
+        // Chỉ điều chỉnh currentPage nếu nó vượt quá totalPages mới
+        if (currentPage > newTotalPages) {
+          setCurrentPage(newTotalPages > 0 ? newTotalPages : 1);
+        }
+      }
+      
+      isUpdatingStatus.current = false;
     } catch (err) {
       console.error('Lỗi khi cập nhật trạng thái đơn hàng:', err);
       setError('Không thể cập nhật trạng thái. Vui lòng thử lại.');
+      isUpdatingStatus.current = false;
     }
   };
 

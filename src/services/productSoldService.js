@@ -1,7 +1,7 @@
 import { axiosInstance } from './tokenService';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-const PRODUCT_SOLD_API_URL = `${API_URL}/product-sold`;
+const BASE_API_URL = process.env.REACT_APP_API_URL ;
+const PRODUCT_SOLD_API_URL = `${BASE_API_URL}/api/v1/product-sold`;
 
 // Get all sold products
 export const getSoldProducts = async () => {

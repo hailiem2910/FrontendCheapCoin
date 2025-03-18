@@ -1,7 +1,7 @@
 import { axiosInstance } from './tokenService';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-const ORDER_API_URL = `${API_URL}/order`;
+const BASE_API_URL = process.env.REACT_APP_API_URL;
+const ORDER_API_URL = `${BASE_API_URL}/api/v1/order`;
 
 // Lấy tất cả đơn hàng (chỉ cho Admin)
 export const getOrders = async () => {
@@ -90,6 +90,17 @@ export const getPendingShipments = async () => {
     return response.data;
   } catch (error) {
     console.error('Error fetching pending shipments:', error);
+    throw error;
+  }
+};
+
+// Lấy thống kê đơn hàng
+export const getOrderAnalytics = async () => {
+  try {
+    const response = await axiosInstance.get(`${ORDER_API_URL}/admin/analytics`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching order analytics:', error);
     throw error;
   }
 };

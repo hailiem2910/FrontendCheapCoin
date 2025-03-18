@@ -16,6 +16,7 @@ const AdminHeader = () => {
       <div className="admin-header-container">
         <div className="admin-logo">CHEAPCOIN</div>
         <nav className="admin-nav-menu">
+        <Link to="/admin/dashboard" className="admin-nav-link">Dashboard</Link>
           <Link to="/admin/orders" className="admin-nav-link">Orders Management</Link>
           <Link to="/admin/sold-products" className="admin-nav-link">Products Sold Management</Link>
           <Link to="/admin/products" className="admin-nav-link">Products Management</Link>

@@ -16,7 +16,7 @@ const Login = () => {
     setError('');
     
     try {
-      const response = await axiosInstance.post('http://localhost:5000/api/v1/auth/login', { email, password });
+      const response = await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/v1/auth/login`, { email, password });
       
       // Lưu token vào localStorage
       localStorage.setItem('accessToken', response.data.accessToken);
@@ -37,7 +37,7 @@ const Login = () => {
     try {
       const { credential } = credentialResponse;
       
-      const backendResponse = await axiosInstance.post(`${process.env.REACT_APP_API_URL}/auth/google-login`, { token: credential });
+      const backendResponse = await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/v1/auth/google-login`, { token: credential });
       
       // Lưu token vào localStorage
       localStorage.setItem('accessToken', backendResponse.data.accessToken);

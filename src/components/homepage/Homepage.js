@@ -141,7 +141,7 @@ const HomePage = () => {
         ))}
       </div>
 
-      <div className="categories-nav">
+      {/* <div className="categories-nav">
         <button className="category-button">BUNNY</button>
         <button className="category-button">TOP SELLING</button>
         <button className="category-button">IKEMEN</button>
@@ -160,7 +160,7 @@ const HomePage = () => {
 
       <div className="get-rek-container">
         <button className="get-rek-button">GET REK ! </button>
-      </div>
+      </div> */}
 
       <h2 className="section-title">TOP SELLINGS</h2>
       <div className="products-grid">

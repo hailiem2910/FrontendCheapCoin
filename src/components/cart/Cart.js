@@ -94,7 +94,11 @@ const Cart = () => {
                              selectedItems.length === cart.items.length;
   
   if (loading) return <div className="loading">Loading cart...</div>;
-  if (error) return <div className="error">{error}</div>;
+  if (error) return (
+    <div className="alert alert-error" style={{ margin: '30px 160px' }}>
+      {error}
+    </div>
+  );
   if (!cart || cart.items.length === 0) {
     return (
       <div className="cart-container">
@@ -110,9 +114,9 @@ const Cart = () => {
       </div>
     );
   }
-  const shippingFee = 30000;
+  // const shippingFee = 30000;
   const subtotal = calculateSubtotal();
-  const total = subtotal + shippingFee;
+  const total = subtotal;
   return (
     <div className="cart-container">
       <div className="cart-content">
@@ -196,10 +200,10 @@ const Cart = () => {
               <span>Subtotal :</span>
               <span>{subtotal.toLocaleString()} VND</span>
             </div>
-            <div className="summary-row">
+            {/* <div className="summary-row">
               <span>Shipping :</span>
               <span>{shippingFee.toLocaleString()} VND</span>
-            </div>
+            </div> */}
             <div className="summary-row total">
               <span>Total :</span>
               <span>{total.toLocaleString()} VND</span>

@@ -7,8 +7,9 @@ import './Checkout.css';
 const Checkout = () => {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
-  const [user, setUser] = useState({ email: '', fullName: '' });
+  const [user, setUser] = useState({ email: ''});
   const [formData, setFormData] = useState({
+    fullName: '',
     phone: '',
     address: '',
     ward: '',
@@ -19,7 +20,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const shippingFee = 30000;
+  // const shippingFee = 30000;
 
   useEffect(() => {
     fetchCartItems();
@@ -29,10 +30,11 @@ const Checkout = () => {
   const fetchCartItems = async () => {
     try {
       const data = await getCartItems();
-      if (data && data.items) {
+      if (data && data.items && data.items.length > 0) {
         setCartItems(data.items);
       } else {
-        setError('No items in cart');
+        setError('Your cart is empty. Please add items before checkout.');
+      setTimeout(() => navigate('/cart'), 3000);
       }
     } catch (err) {
       console.error('Error fetching cart:', err);
@@ -75,7 +77,7 @@ const Checkout = () => {
     }
   }, 0);
   
-  const total = subtotal + shippingFee;
+  const total = subtotal ;
 
   const validateForm = () => {
     if (!formData.phone || !formData.address || !formData.ward || 
@@ -98,6 +100,7 @@ const Checkout = () => {
 const handleCheckout = async () => {
   if (!validateForm()) {
     return;
+    
   }
   
   if (cartItems.length === 0) {
@@ -113,7 +116,7 @@ const handleCheckout = async () => {
   const orderData = {
     paymentMethod: formData.paymentMethod,
     shippingAddress: {
-      fullName: user.fullName,
+      fullName: formData.fullName,
       phone: formData.phone,
       address: `${formData.address}, ${formData.ward}, ${formData.district}, ${formData.city}`
     }
@@ -121,10 +124,9 @@ const handleCheckout = async () => {
 
   try {
     // Create order first
-  const response = await axiosInstance.post('http://localhost:5000/api/v1/order/create', orderData);
-  
+  const response = await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/v1/order/create`, orderData);
   console.log("Order creation response:", response.data);
-
+  console.log("Order data being sent:", orderData);
   // Kiểm tra xem response có result không
   if (!response.data || !response.data.result) {
     throw new Error('Order creation failed - no result returned');
@@ -144,10 +146,7 @@ const handleCheckout = async () => {
     // Call API to create payment link for PayOS
     console.log("Creating payment link for order:", orderId);
     
-    const paymentResponse = await axiosInstance.post(
-      'http://localhost:5000/api/v1/payment/create-payment-link', 
-      { orderId: orderId }
-    );
+    const paymentResponse = await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/v1/payment/create-payment-link`, { orderId: orderId });
     
     if (paymentResponse.data && paymentResponse.data.checkoutUrl) {
       // Redirect to PayOS checkout URL
@@ -173,7 +172,17 @@ const handleCheckout = async () => {
     <div className="checkout-container">
       <h1 className="checkout-title">Check Out</h1>
       
-      {error && <div className="error-message">{error}</div>}
+      {error && (
+  <div className="alert alert-error">
+    {error}
+    <button 
+      className="alert-close" 
+      onClick={() => setError('')}
+    >
+      ×
+    </button>
+  </div>
+)}
       
       <div className="checkout-content">
         <div className="order-details">
@@ -218,10 +227,10 @@ const handleCheckout = async () => {
               <span>Subtotal:</span>
               <span>{subtotal.toLocaleString()} VND</span>
             </div>
-            <div className="summary-row">
+            {/* <div className="summary-row">
               <span>Shipping:</span>
               <span>{shippingFee.toLocaleString()} VND</span>
-            </div>
+            </div> */}
             <div className="summary-row total">
               <span>Total:</span>
               <span>{total.toLocaleString()} VND</span>
@@ -233,7 +242,15 @@ const handleCheckout = async () => {
           <h2>Purchase Information</h2>
           <form onSubmit={(e) => e.preventDefault()}>
             <input type="email" value={user.email} disabled className="form-input" />
-            <input type="text" value={user.fullName} disabled className="form-input" />
+            <input 
+              type="text"
+              name="fullName"
+              placeholder='fullName' 
+              value={formData.fullName} 
+              className="form-input"
+              onChange={handleInputChange}
+              required
+            />
             <input 
               type="tel" 
               name="phone" 

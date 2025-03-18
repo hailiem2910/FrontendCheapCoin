@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const BASE_API_URL = process.env.REACT_APP_API_URL ;
 const AUTH_API_URL = `${BASE_API_URL}/api/v1/auth`;
 
 // Tạo axios instance với interceptor
@@ -15,37 +15,24 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
-    // Nếu lỗi 401 (Unauthorized) và chưa thử refresh token
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
       try {
         const refreshToken = localStorage.getItem('refreshToken');
+        const response = await axios.post(`${AUTH_API_URL}/refreshToken`, { refreshToken });
         
-        // Gọi API refresh token
-        const response = await axios.post(`${AUTH_API_URL}/refreshToken`, {
-          refreshToken
-        });
-        
-        // Lưu tokens mới
+        // Cập nhật access token mới vào localStorage và header
         localStorage.setItem('accessToken', response.data.accessToken);
-        localStorage.setItem('refreshToken', response.data.refreshToken);
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${response.data.accessToken}`;
+        originalRequest.headers['Authorization'] = `Bearer ${response.data.accessToken}`; // ⚠️ Quan trọng: Cập nhật header cho request gốc
         
-        // Cập nhật header cho request ban đầu
-        originalRequest.headers['Authorization'] = `Bearer ${response.data.accessToken}`;
-        
-        // Thực hiện lại request ban đầu
-        return axiosInstance(originalRequest);
+        return axiosInstance(originalRequest); // Gửi lại request gốc với token mới
       } catch (refreshError) {
-        // Nếu refresh token cũng hết hạn, logout
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        // Xử lý khi refresh token hết hạn
+        logout();
         window.location.href = '/login';
-        return Promise.reject(refreshError);
       }
     }
-    
     return Promise.reject(error);
   }
 );

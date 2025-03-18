@@ -39,7 +39,7 @@ const Header = () => {
           )}
           <Link to="/cart" className="cart-containers">
             <i className="fas fa-shopping-cart cart-icon"></i>
-            <span className="cart-badge">2</span>
+            {/* <span className="cart-badge">2</span> */}
           </Link>
         </div>
       </div>
