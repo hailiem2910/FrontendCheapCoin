@@ -13,12 +13,13 @@ const AddSeries = () => {
     size: '',
     material: '',
     ageToUse: '',
-    quantity: '', // Added quantity field to state
-    representativeImage: null
+    quantity: '',
+    imageUrls: [] // Initialize as empty array
   });
 
   const [seriesList, setSeriesList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedImageNames, setSelectedImageNames] = useState([]); // Track image names for display
 
   useEffect(() => {
     // Fetch all series when component mounts
@@ -46,12 +47,40 @@ const AddSeries = () => {
   };
 
   const handleImageChange = (e) => {
-    if (e.target.files) {
-      setSeriesData({
-        ...seriesData,
-        imageUrls: Array.from(e.target.files) // Lưu dưới dạng mảng
-      });
+    if (e.target.files && e.target.files.length > 0) {
+      // Get the new files
+      const newFiles = Array.from(e.target.files);
+      
+      // Update the file array by appending new files
+      setSeriesData(prevData => ({
+        ...prevData,
+        imageUrls: [...prevData.imageUrls, ...newFiles]
+      }));
+
+      // Update selected image names for display
+      setSelectedImageNames(prevNames => [
+        ...prevNames,
+        ...newFiles.map(file => file.name)
+      ]);
     }
+  };
+
+  // Function to remove an image from the selection
+  const removeImage = (index) => {
+    setSeriesData(prevData => {
+      const updatedImageUrls = [...prevData.imageUrls];
+      updatedImageUrls.splice(index, 1);
+      return {
+        ...prevData,
+        imageUrls: updatedImageUrls
+      };
+    });
+    
+    setSelectedImageNames(prevNames => {
+      const updatedNames = [...prevNames];
+      updatedNames.splice(index, 1);
+      return updatedNames;
+    });
   };
 
   const handleInputChange = (e) => {
@@ -67,22 +96,29 @@ const AddSeries = () => {
     try {
       setLoading(true);
       
+      // Check if we have at least 6 images as required by the backend
+      if (seriesData.imageUrls.length < 6) {
+        alert('Vui lòng upload ít nhất 6 tấm hình!');
+        setLoading(false);
+        return;
+      }
+      
       // Create FormData object to handle file upload
       const formData = new FormData();
       
-
+      // Append each image to formData
       seriesData.imageUrls.forEach((file) => {
         formData.append('imageUrls', file);
       });
 
-      const fieldsToExclude = ['imageUrls', 'representativeImage']; // Loại bỏ trường ảnh cũ
+      // Append other fields to formData
+      const fieldsToExclude = ['imageUrls'];
       Object.entries(seriesData).forEach(([key, value]) => {
         if (!fieldsToExclude.includes(key) && value !== null && value !== '') {
           formData.append(key, value);
         }
       });
     
-
       // Make API call to create series
       await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/v1/seri/create`, formData, {
         headers: {
@@ -101,9 +137,10 @@ const AddSeries = () => {
         size: '',
         material: '',
         ageToUse: '',
-        quantity: '', // Reset quantity field
-        representativeImage: null
+        quantity: '',
+        imageUrls: []
       });
+      setSelectedImageNames([]);
 
       // Refresh the series list
       fetchSeries();
@@ -186,7 +223,6 @@ const AddSeries = () => {
               />
             </div>
             
-            {/* New Quantity Field */}
             <div className="form-add-series">
               <input
                 type="number"
@@ -273,21 +309,40 @@ const AddSeries = () => {
             
             <div className="form-add-series">
               <label className="file-input-label">
-                Representative Image:
+                Add Images:
                 <input
                   type="file"
                   accept="image/*"
-                  multiple
                   onChange={handleImageChange}
-                   name="imageUrls"
+                  name="imageUrls"
                   className="form-file-input"
-                  required
                 />
               </label>
-              {seriesData.representativeImage && (
-                <p className="file-name">
-                  Selected: {seriesData.representativeImage.name}
-                </p>
+              
+              {/* Display selected images */}
+              {selectedImageNames.length > 0 && (
+                <div className="selected-images">
+                  <p>Selected Images ({selectedImageNames.length}):</p>
+                  <ul className="image-list">
+                    {selectedImageNames.map((name, index) => (
+                      <li key={index} className="image-item">
+                        <span className="image-name">{name}</span>
+                        <button 
+                          type="button" 
+                          className="remove-image-btn"
+                          onClick={() => removeImage(index)}
+                        >
+                          ×
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  {seriesData.imageUrls.length < 6 && (
+                    <p className="image-requirement-warning">
+                      You need at least 6 images (Currently: {seriesData.imageUrls.length})
+                    </p>
+                  )}
+                </div>
               )}
             </div>
             

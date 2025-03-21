@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
-
+import logoImage from '../../img/LOGO CHEAP COIN.png'
 const Header = () => {
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem('accessToken');
@@ -17,7 +17,9 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header-container">
-        <div className="logo">CHEAPCOIN</div>
+        <div className="logo">
+          <img src={logoImage} alt="CHEAPCOIN" className="logo-image" />
+        </div>
         <nav className="nav-menu">
           <Link to="/" className="nav-link">HOME</Link>
           <Link to="/product" className="nav-link">PRODUCT</Link>

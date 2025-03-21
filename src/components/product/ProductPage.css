@@ -85,35 +85,41 @@ body {
 .products-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  gap: 30px;
   margin-bottom: 32px;
 }
 
-.product-card {
-  cursor: pointer;
+.product-card-page {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
 }
 
 .product-image-container {
-  aspect-ratio: 3/4;
+  width: 100%;
   margin-bottom: 16px;
 }
 
 .product-image {
   width: 100%;
-  height: 100%;
+  height: 290px;
+  aspect-ratio: 2/3;
   object-fit: cover;
   border-radius: 8px;
 }
 
 .product-name {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin: 0.5rem 0;
+  font-family: 'Afacad', sans-serif;
 }
 
 .product-price {
-  color: #ef4444;
+  color: #FF4B4B;
   font-weight: bold;
+  margin: 0;
 }
 
 .pagination {

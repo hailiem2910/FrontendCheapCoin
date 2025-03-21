@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import './ProductSoldManagement.css';
 import { getSoldProducts, getSoldProductsAnalytics } from '../../../services/productSoldService';
 
-
 const ProductSoldManagement = () => {
   const [soldProducts, setSoldProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -26,9 +25,16 @@ const ProductSoldManagement = () => {
     try {
       setLoading(true);
       const response = await getSoldProducts();
-      setSoldProducts(response.soldProducts);
-      setFilteredProducts(response.soldProducts);
-      setTotalPages(Math.ceil(response.soldProducts.length / productsPerPage));
+      
+      // Xác định trạng thái chính xác dựa trên quantity
+      const productsWithFixedStatus = response.soldProducts.map(product => ({
+        ...product,
+        productStatus: product.quantity > 0 ? 'In Stock' : 'Sold Out'
+      }));
+      
+      setSoldProducts(productsWithFixedStatus);
+      setFilteredProducts(productsWithFixedStatus);
+      setTotalPages(Math.ceil(productsWithFixedStatus.length / productsPerPage));
       setLoading(false);
     } catch (err) {
       console.error('Lỗi khi lấy danh sách sản phẩm đã bán:', err);
@@ -62,9 +68,9 @@ const ProductSoldManagement = () => {
     let filtered = [...soldProducts];
     
     if (filters.inStock && !filters.soldOut) {
-      filtered = filtered.filter(product => product.productStatus === 'In Stock');
+      filtered = filtered.filter(product => product.quantity > 0);
     } else if (!filters.inStock && filters.soldOut) {
-      filtered = filtered.filter(product => product.productStatus === 'Sold Out');
+      filtered = filtered.filter(product => product.quantity <= 0);
     }
     
     setFilteredProducts(filtered);
@@ -111,6 +117,11 @@ const ProductSoldManagement = () => {
         {pages}
       </div>
     );
+  };
+
+  // Xác định trạng thái dựa trên quantity
+  const getProductStatus = (quantity) => {
+    return quantity > 0 ? 'In Stock' : 'Sold Out';
   };
 
   if (loading) return <div className="product-sold-loading">Đang tải danh sách sản phẩm...</div>;
@@ -161,22 +172,27 @@ const ProductSoldManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {getCurrentProducts().map(product => (
-                <tr key={product._id}>
-                  <td>#{product._id.substring(0, 8)}</td>
-                  <td>{product.productName}</td>
-                  <td>{formatCurrency(product.productPrice)}</td>
-                  <td>{product.quantity}</td>
-                  <td>{formatCurrency(product.total)}</td>
-                  <td>{formatDate(product.createdAt)}</td>
-                  <td className={`product-sold-status product-status-${product.productStatus === 'In Stock' ? 'instock' : 'soldout'}`}>
-                    {product.productStatus}
-                  </td>
-                  <td>
-                    {product.type === 'set' ? 'Bộ sưu tập' : 'Sản phẩm đơn'}
-                  </td>
-                </tr>
-              ))}
+              {getCurrentProducts().map(product => {
+                // Xác định trạng thái dựa trên quantity
+                const status = getProductStatus(product.quantity);
+                
+                return (
+                  <tr key={product._id}>
+                    <td>#{product._id.substring(0, 8)}</td>
+                    <td>{product.productName}</td>
+                    <td>{formatCurrency(product.productPrice)}</td>
+                    <td>{product.quantity}</td>
+                    <td>{formatCurrency(product.total)}</td>
+                    <td>{formatDate(product.createdAt)}</td>
+                    <td className={`product-sold-status product-status-${status === 'In Stock' ? 'instock' : 'soldout'}`}>
+                      {status}
+                    </td>
+                    <td>
+                      {product.type === 'set' ? 'Bộ sưu tập' : 'Sản phẩm đơn'}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

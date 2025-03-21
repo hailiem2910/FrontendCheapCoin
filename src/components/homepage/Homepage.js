@@ -56,6 +56,19 @@ const HomePage = () => {
     return series.posterImageURL || "https://via.placeholder.com/300x300?text=No+Image";
   };
 
+  const getSeriesImages = (series) => {
+    // Mặt trước là posterImageURL (ảnh đại diện)
+    const frontImage = series.posterImageURL || "https://via.placeholder.com/300x300?text=No+Image";
+    
+    // Mặt sau là ảnh thứ 2 trong mảng imageUrls nếu có, nếu không thì dùng mặt trước
+    let backImage = frontImage;
+    if (series.imageUrls && series.imageUrls.length > 1) {
+      backImage = series.imageUrls[1];
+    }
+    
+    return { frontImage, backImage };
+  };
+
   // Extract just what we need for the first 4 series
   const newProductsSeries = allSeries.slice(0, 4);
   
@@ -95,23 +108,26 @@ const HomePage = () => {
 
       <h2 className="new-products-title">NEW PRODUCTS</h2>
       <div className="product-grid">
-        {newProductsSeries.map((series) => (
-          <Link to={`/product/${series._id}`} key={series._id} className="new-product-item">
-            <div className="product-card">
-              <div className="product-card-inner">
-                <div className="product-card-front">
-                  <img src={getImageUrl(series)} alt={series.name} />
-                </div>
-                <div className="product-card-back">
-                  <img src={getImageUrl(series)} alt={`${series.name} back view`} />
-                </div>
-              </div>
+  {newProductsSeries.map((series) => {
+    const { frontImage, backImage } = getSeriesImages(series);
+    return (
+      <Link to={`/product/${series._id}`} key={series._id} className="new-product-item">
+        <div className="product-card-home">
+          <div className="product-card-inner">
+            <div className="product-card-front">
+              <img src={frontImage} alt={series.name} />
             </div>
-            <h3>{series.name}</h3>
-            <p className="price">{series.price.toLocaleString()} Đ</p>
-          </Link>
-        ))}
-      </div>
+            <div className="product-card-back">
+              <img src={backImage} alt={`${series.name} back view`} />
+            </div>
+          </div>
+        </div>
+        <h3>{series.name}</h3>
+        <p className="price">{series.price.toLocaleString()} Đ</p>
+      </Link>
+    );
+  })}
+</div>
 
       <h2 className="featured-title">FEATURED</h2>
       <div className="featured-grid">

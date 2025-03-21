@@ -56,7 +56,7 @@ body, html {
   display: flex;
   gap: 2rem;
   position: absolute;
-  left: 50%; 
+  left: 40%; 
   transform: translateX(-50%); 
 }
 
@@ -192,4 +192,9 @@ body, html {
 .logout-btn:hover {
   background-color: #fff;
   color: #000;
+}
+
+.logo-image {
+  height: 55px;
+  width: auto;
 }
