@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import { getOrders, getOrderAnalytics } from '../../../services/orderService';
-import { getSoldProducts} from '../../../services/productSoldService';
+import { getSoldProducts } from '../../../services/productSoldService';
+import { getRecentUsers } from '../../../services/userService';
 
 const Dashboard = () => {
+  const MONTHLY_PRODUCT_TARGET = 100;
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentMonth, setCurrentMonth] = useState('');
@@ -14,9 +17,11 @@ const Dashboard = () => {
     revenueChange: 0,
     ordersChange: 0,
     productsChange: 0,
-    goalCompletion: 88
+    goalCompletion: 88,
+    newCustomers: 0
   });
   const [topProducts, setTopProducts] = useState([]);
+  const [recentUsers, setRecentUsers] = useState([]);
 
   useEffect(() => {
     const now = new Date();
@@ -29,10 +34,11 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [ordersResponse, analyticsResponse, productsResponse] = await Promise.all([
+      const [ordersResponse, analyticsResponse, productsResponse, usersResponse] = await Promise.all([
         getOrders(),
         getOrderAnalytics(),
-        getSoldProducts()
+        getSoldProducts(),
+        getRecentUsers()
       ]);
 
       // Process orders data
@@ -88,7 +94,10 @@ const Dashboard = () => {
       const productsChange = lastMonthTotalProducts === 0 ? 100 : ((totalProductsSold - lastMonthTotalProducts) / lastMonthTotalProducts * 100).toFixed(1);
 
       // Calculate goal completion (mock data - would be from analytics in real app)
-      const goalCompletion = analyticsResponse?.goalCompletion || 88;
+      const goalCompletion = Math.min(Math.round((totalProductsSold / MONTHLY_PRODUCT_TARGET) * 100), 100);
+
+       // Tính toán số lượng khách hàng mới (tất cả khách hàng có role Customer)
+       const newCustomersCount = usersResponse.data ? usersResponse.data.length : 0;
 
       setMonthlyStats({
         totalRevenue,
@@ -97,7 +106,8 @@ const Dashboard = () => {
         revenueChange,
         ordersChange,
         productsChange,
-        goalCompletion
+        goalCompletion,
+        newCustomers: newCustomersCount
       });
 
       // Process top products
@@ -118,7 +128,8 @@ const Dashboard = () => {
             quantity, 
             _id, 
             revenue: price * quantity,
-            popularity: Math.floor(Math.random() * 100) // Mock popularity data
+            // Calculate popularity based on product quantity compared to monthly target
+            popularity: Math.min(Math.floor((quantity / MONTHLY_PRODUCT_TARGET) * 100), 100)
           });
         }
       });
@@ -129,6 +140,9 @@ const Dashboard = () => {
         .slice(0, 5); // Get top 5
 
       setTopProducts(topProductsArray);
+      
+      // Set recent users
+      setRecentUsers(usersResponse.data ? usersResponse.data.slice(0, 5) : []);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
@@ -140,6 +154,14 @@ const Dashboard = () => {
   // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  };
+
+  // Format date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes} PM`;
   };
 
   // Calculate popularity class
@@ -178,110 +200,136 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <div className="dashboard-content">
-        <h1 className="dashboard-title">Dashboard</h1>
+        <h1 className="dashboard-title">Dash Board</h1>
         
-        <div className="dashboard-section">
-          <h2 className="dashboard-section-title">
-            Doanh Thu
-            <div className="goal-progress">
-              <div className="progress-circle">
-                <svg className="progress-ring" width="80" height="80">
-                  <circle 
-                    className="progress-ring-bg"
-                    cx="40" 
-                    cy="40" 
-                    r="36"
-                  />
-                  <circle 
-                    className="progress-ring-circle progress-ring-value"
-                    cx="40" 
-                    cy="40" 
-                    r="36"
-                    style={{ 
-                      strokeDasharray: `${2 * Math.PI * 36}`,
-                      strokeDashoffset: `${2 * Math.PI * 36 * (1 - monthlyStats.goalCompletion / 100)}`
-                    }}
-                  />
-                </svg>
-                <div className="progress-text">{monthlyStats.goalCompletion}%</div>
-              </div>
-            </div>
-          </h2>
-          
-          <div className="dashboard-cards">
-            <div className="dashboard-card revenue-card">
-              <div className="dashboard-card-header">
-                <h3>Tháng {currentMonth}</h3>
-                <div className="dashboard-card-badge">Doanh thu</div>
-              </div>
-              <div className="dashboard-card-body">
-                <div className="dashboard-card-value">
-                  {formatCurrency(monthlyStats.totalRevenue)}
-                </div>
-                <div className="dashboard-card-subtitle">
-                  Tổng doanh thu
-                </div>
-                {renderTrendIndicator(monthlyStats.revenueChange)}
-              </div>
-            </div>
+        <div className="dashboard-main-content">
+          {/* Left section - Revenue stats */}
+          <div className="dashboard-section dashboard-left-section">
+            <h2 className="dashboard-section-title">Revenue</h2>
             
-            <div className="dashboard-card order-card">
-              <div className="dashboard-card-header">
-                <h3>Tháng {currentMonth}</h3>
-                <div className="dashboard-card-badge">Đơn hàng</div>
+            <div className="dashboard-sales-card">
+              <div className="dashboard-sales-header">
+                <div className="dashboard-month-sales">
+                  <h3>Month's Sales</h3>
+                  <span>Sales Summary</span>
+                </div>
+                <div className="dashboard-goal-circle">
+                  <div className="goal-text">GOALS</div>
+                  <svg className="progress-ring" width="80" height="80">
+                    <circle 
+                      className="progress-ring-bg"
+                      cx="40" 
+                      cy="40" 
+                      r="36"
+                      stroke="#EEEEEE"
+                      strokeWidth="6"
+                      fill="transparent"
+                    />
+                    <circle 
+                      className="progress-ring-circle progress-ring-value"
+                      cx="40" 
+                      cy="40" 
+                      r="36"
+                      stroke="#4CAF50"
+                      strokeWidth="6"
+                      fill="transparent"
+                      strokeLinecap="round"
+                      style={{ 
+                        strokeDasharray: `${2 * Math.PI * 36}`,
+                        strokeDashoffset: `${2 * Math.PI * 36 * (1 - monthlyStats.goalCompletion / 100)}`
+                      }}
+                    />
+                  </svg>
+                  <span className="goal-percentage">{monthlyStats.goalCompletion}%</span>
+                </div>
+                <div className="dashboard-month">{currentMonth}</div>
               </div>
-              <div className="dashboard-card-body">
-                <div className="dashboard-card-value">
-                  {monthlyStats.totalOrders}
+              
+              <div className="dashboard-sales-grid">
+                <div className="dashboard-sales-item">
+                  <div className="sales-icon revenue-icon">₫</div>
+                  <div className="sales-info">
+                    <div className="sales-value">{formatCurrency(monthlyStats.totalRevenue)}</div>
+                    <div className="sales-label">Total Sales</div>
+                    <div className="sales-change">+{monthlyStats.revenueChange}% from last month</div>
+                  </div>
                 </div>
-                <div className="dashboard-card-subtitle">
-                  Tổng đơn hàng
+                
+                <div className="dashboard-sales-item">
+                  <div className="sales-icon box-icon">📦</div>
+                  <div className="sales-info">
+                    <div className="sales-value">{monthlyStats.totalProductsSold}</div>
+                    <div className="sales-label">Product Sold</div>
+                    <div className="sales-change">+{monthlyStats.productsChange}% from last month</div>
+                  </div>
                 </div>
-                {renderTrendIndicator(monthlyStats.ordersChange)}
+                
+                <div className="dashboard-sales-item">
+                  <div className="sales-icon order-icon">📝</div>
+                  <div className="sales-info">
+                    <div className="sales-value">{monthlyStats.totalOrders}</div>
+                    <div className="sales-label">Total Orders</div>
+                    <div className="sales-change">+{monthlyStats.ordersChange}% from last month</div>
+                  </div>
+                </div>
+                
+                <div className="dashboard-sales-item">
+                  <div className="sales-icon customer-icon">👥</div>
+                  <div className="sales-info">
+                    <div className="sales-value">{monthlyStats.newCustomers}</div>
+                    <div className="sales-label">New Customers</div>
+                    <div className="sales-change">+25% from last month</div>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+
+          {/* Right section - Recent emails */}
+          <div className="dashboard-section dashboard-right-section">
+            <h2 className="dashboard-section-title">Recent Mail</h2>
             
-            <div className="dashboard-card product-card">
-              <div className="dashboard-card-header">
-                <h3>Tháng {currentMonth}</h3>
-                <div className="dashboard-card-badge">Sản phẩm</div>
-              </div>
-              <div className="dashboard-card-body">
-                <div className="dashboard-card-value">
-                  {monthlyStats.totalProductsSold}
-                </div>
-                <div className="dashboard-card-subtitle">
-                  Sản phẩm đã bán
-                </div>
-                {renderTrendIndicator(monthlyStats.productsChange)}
-              </div>
+            <div className="dashboard-email-list">
+              {recentUsers.length > 0 ? (
+                recentUsers.map((user, index) => (
+                  <div className="dashboard-email-item" key={user._id}>
+                    <div className="user-avatar">
+                      <div className="avatar-circle">{user.fullName ? user.fullName.charAt(0).toUpperCase() : '?'}</div>
+                    </div>
+                    <div className="user-email-info">
+                      <div className="user-name">{user.email}</div>
+                      <div className="email-subject">Meeting Started</div>
+                    </div>
+                    <div className="email-time">{formatDate(user.createdAt)}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="dashboard-no-data">Không có dữ liệu email mới</div>
+              )}
             </div>
           </div>
         </div>
         
-        <div className="dashboard-section">
-          <h2 className="dashboard-section-title">Sản Phẩm Bán Chạy</h2>
+        <div className="dashboard-section products-section">
+          <h2 className="dashboard-section-title">Products</h2>
           
           <div className="dashboard-table-container">
+            <div className="top-products-header">
+              <h3>Top Products</h3>
+            </div>
             <table className="dashboard-table">
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>ID</th>
-                  <th>Tên sản phẩm</th>
-                  <th>Độ phổ biến</th>
-                  <th>Số lượng đã bán</th>
+                  <th>Name</th>
+                  <th>Popularity</th>
+                  <th>Sales</th>
                 </tr>
               </thead>
               <tbody>
                 {topProducts.map((product, index) => (
                   <tr key={product._id}>
-                    <td>
-                      <div className={`product-rank ${index < 3 ? `rank-${index + 1}` : ''}`}>
-                        {index + 1}
-                      </div>
-                    </td>
-                    <td><span className="product-id">#{product._id.substring(0, 8)}</span></td>
+                    <td className="rank-cell">{index + 1}</td>
                     <td>{product.productName}</td>
                     <td>
                       <div className="product-popularity">
@@ -291,7 +339,6 @@ const Dashboard = () => {
                             style={{ width: `${product.popularity}%` }}
                           ></div>
                         </div>
-                        <span>{product.popularity}%</span>
                       </div>
                     </td>
                     <td>
@@ -303,7 +350,7 @@ const Dashboard = () => {
                 ))}
                 {topProducts.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="dashboard-no-data">
+                    <td colSpan="4" className="dashboard-no-data">
                       Không có dữ liệu sản phẩm trong tháng này
                     </td>
                   </tr>
