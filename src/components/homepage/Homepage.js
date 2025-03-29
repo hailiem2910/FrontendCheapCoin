@@ -4,6 +4,7 @@ import "./Specialbanner.css";
 import { Link } from 'react-router-dom';
 import happyNewYearImg from './../../img/happynewyear.png';
 import Cover from './../../img/COVER 1.png'
+import Card1 from './../../img/CARD 1.png'
 import comingsoon from './../../img/coming soon.png';
 import cardN2 from './../../img/card N2.png';
 import cardN1 from './../../img/card N1.png';
@@ -134,7 +135,7 @@ const HomePage = () => {
       <div className="featured-grid">
         {[1, 2].map((item) => (
           <div key={item} className="featured-item">
-            <img src={happyNewYearImg} alt="Featured" />
+            <img src={Card1} alt="Featured" />
           </div>
         ))}
       </div>
