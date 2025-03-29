@@ -3,6 +3,7 @@ import './Homepage.css';
 import "./Specialbanner.css";
 import { Link } from 'react-router-dom';
 import happyNewYearImg from './../../img/happynewyear.png';
+import Cover from './../../img/COVER 1.png'
 import comingsoon from './../../img/coming soon.png';
 import cardN2 from './../../img/card N2.png';
 import cardN1 from './../../img/card N1.png';
@@ -11,7 +12,7 @@ import { getAllSeries } from '../../services/seriesService';
 const carouselItems = [
   {
     id: 1,
-    image: happyNewYearImg,
+    image: Cover,
   },
   {
     id: 2,
