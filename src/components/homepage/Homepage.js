@@ -131,14 +131,15 @@ const HomePage = () => {
   })}
 </div>
 
-      <h2 className="featured-title">FEATURED</h2>
-      <div className="featured-grid">
-        {[1, 2].map((item) => (
-          <div key={item} className="featured-item">
-            <img src={Card1} alt="Featured" />
-          </div>
-        ))}
-      </div>
+<h2 className="featured-title">FEATURED</h2>
+<div className="featured-grid">
+  <div className="featured-item">
+    <img src={Card1} alt="Featured Card" />
+  </div>
+  <div className="featured-item">
+    <img src={happyNewYearImg} alt="Happy New Year" />
+  </div>
+</div>
 
       <h2 className="ikemen-series-recommendation-title">IKEMEN SEIRIES RECOMMENDATION</h2>
       <div className="recommendation-grid">
